@@ -1,9 +1,16 @@
-const mongoose=require('mongoose');
-const facebookuserSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    userId:{type: String,required: true},
-   userName:{type :String,required:true},
-   email:{type: String}
-});
+const express = require("express");
+const router = express.Router();
 
-module.exports = mongoose.model('fbuser', facebookuserSchema);
+const fbUserController = require('../controllers/facebookuser');
+const checkAuth = require('../middleware/check-auth');
+var multer  = require('multer');
+var upload = multer({ dest: 'uploads/' });
+
+router.post("/fbuser/signup", fbUserController.fbuser_signup);
+
+// router.post("/login", upload.none(), UserController.fbuser_login);
+
+
+
+
+module.exports = router;
