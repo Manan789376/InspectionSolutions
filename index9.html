@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <meta http-equiv="X-UA-Compatible" content="ie=edge">
+       <title>Facebook Login javascript example</title>
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+       
+         
+   
+       <style>
+       .container{
+           margin-top: 10%;
+       }
+       .data{
+           display: none;
+       }
+       </style>
+</head>
+
+<body>
+<script>
+ // This is called with the results from from FB.getLoginStatus().
+ function statusChangeCallback(response) {
+   console.log('statusChangeCallback');
+   console.log(response);
+   if (response.status === 'connected') {
+     // Logged into your app and Facebook.
+     testAPI();
+   } else {
+     // The person is not logged into your app or we are unable to tell.
+     document.getElementById('status').innerHTML = 'Please log ' + 'into this app.';
+   }
+ }
+ function checkLoginState() {
+   FB.getLoginStatus(function(response) {
+     statusChangeCallback(response);
+   });
+ }
+ window.fbAsyncInit = function() {
+   FB.init({
+     appId      : '819867771899150',
+     cookie     : true,
+     xfbml      : true,
+     version    : 'v3.0'
+   });
+   FB.getLoginStatus(function(response) {
+     statusChangeCallback(response);
+   });
+ };
+ // Load the SDK asynchronously
+ (function(d, s, id) {
+   var js, fjs = d.getElementsByTagName(s)[0];
+   if (d.getElementById(id)) return;
+   js = d.createElement(s); js.id = id;
+   js.src = "https://connect.facebook.net/en_US/sdk.js";
+   fjs.parentNode.insertBefore(js, fjs);
+ }(document, 'script', 'facebook-jssdk'));
+ // Here we run a very simple test of the Graph API after login is
+ // successful.  See statusChangeCallback() for when this call is made.
+ function testAPI() {
+   console.log('Welcome!  Fetching your information.... ');
+   FB.api('/me', {fields: 'id,picture,name,email'}, function(response) {
+     console.log('Successful login for: ' + response.name);
+     console.log('userId: ' + response.email);
+     console.log('email' + response.email);
+     console.log('userName' + response.userName);
+     const params = {
+            userId: response.id,
+            email: response.email,
+            userName: response.name
+           }
+
+           const bodyformData = JSON.stringify(params);
+
+              axios.post('http://localhost:3000/user/aouth/facebook', bodyformData,{
+                headers: {'Content-type': 'application/json'}
+            })
+           .then(function (response) {
+                 console.log(response);
+                 // location.href = 'index-1.html';
+           })
+           .catch(function (error) {
+                 console.log(error);
+           });
+
+     console.log('picture' + response.picture.data.url);
+     document.getElementById('pic').src = response.picture.data.url;
+     document.getElementById('name').innerHTML = response.name;
+     document.getElementById('email').innerHTML = response.email;
+
+   });
+   document.getElementById('fb-btn').style.display = 'none';
+   document.getElementById('status').style.display = 'none';
+   document.querySelector('.data').style.display = 'block';
+}
+
+function logout() {
+   FB.getLoginStatus(function(response) {
+       if (response && response.status === 'connected') {
+           FB.logout(function(response) {
+               document.location.reload();
+
+           });
+       }
+   });
+}
+
+
+ 
+           
+           </script>
+<div class="container">
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" id="fb-btn">
+</fb:login-button>
+<div id="status">
+   </div>
+<div class="data">
+<p class="alert alert-info">profile Details</p>
+<img class="img-circle" id="pic" width="100" height="100"/>
+<p>UserName</p>
+<p id="name" class="alert alert-success"></p>
+<p>Email Address</p>
+<p id="email" class="alert alert-success"></p>
+<button onclick="logout()" class="btn btn-danger">SignOut</button>
+</div>
+</body>
+</html>
